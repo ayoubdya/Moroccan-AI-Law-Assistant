@@ -1,8 +1,4 @@
-import {
-  GoogleGenAI,
-  type ContentEmbedding,
-  type ContentListUnion,
-} from "@google/genai";
+import { GoogleGenAI, type ContentListUnion } from "@google/genai";
 
 export class Gemini {
   private ai: GoogleGenAI;
@@ -20,9 +16,10 @@ export class Gemini {
     const response = await this.ai.models.embedContent({
       model: "models/text-embedding-004", // gemini-embedding-exp-03-07
       contents,
-      // config: {
-      //   outputDimensionality: 1536, // 768
-      // },
+      config: {
+        taskType: "RETRIEVAL_QUERY",
+        //   outputDimensionality: 1536, // 768
+      },
     });
 
     if (!response.embeddings) {
