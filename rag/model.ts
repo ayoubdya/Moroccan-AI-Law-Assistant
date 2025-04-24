@@ -33,16 +33,16 @@ export class Gemini {
     });
   }
 
-  public async prompt(contents: ContentListUnion): Promise<string> {
+  public async *prompt(contents: ContentListUnion): AsyncGenerator<string> {
     const response = await this.ai.models.generateContentStream({
       model: "gemini-2.5-pro-exp-03-25",
       contents,
     });
 
-    let result = "";
     for await (const chunk of response) {
-      result += chunk.text;
+      if (chunk.text) {
+        yield chunk.text;
+      }
     }
-    return result;
   }
 }
