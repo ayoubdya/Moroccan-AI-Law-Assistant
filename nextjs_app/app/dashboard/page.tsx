@@ -1,44 +1,45 @@
 "use client";
 
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import AppHeader from '../components/layout/AppHeader';
+
+// Define types for our data
+type ChatSession = {
+  id: number;
+  sessionName: string;
+  startedAt: string;
+};
+
+type LegalNewsItem = {
+  id: number;
+  title: string;
+  publishedAt: string;
+};
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [recentSessions, setRecentSessions] = useState([]);
-  const [legalNews, setLegalNews] = useState([]);
+  const [recentSessions, setRecentSessions] = useState<ChatSession[]>([]);
+  const [legalNews, setLegalNews] = useState<LegalNewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Redirect if not authenticated
-    if (status === 'unauthenticated') {
-      router.push('/auth/login');
-      return;
-    }
+    // Mock data - would be replaced with actual API calls in a real implementation
+    setRecentSessions([
+      { id: 1, sessionName: 'Property Law Inquiry', startedAt: new Date().toISOString() },
+      { id: 2, sessionName: 'Business Registration', startedAt: new Date(Date.now() - 86400000).toISOString() },
+      { id: 3, sessionName: 'Employment Contract', startedAt: new Date(Date.now() - 172800000).toISOString() },
+    ]);
+    
+    setLegalNews([
+      { id: 1, title: 'New Tax Regulations for Small Businesses', publishedAt: new Date().toISOString() },
+      { id: 2, title: 'Changes to Property Law in Morocco', publishedAt: new Date(Date.now() - 86400000).toISOString() },
+      { id: 3, title: 'Supreme Court Ruling on Labor Disputes', publishedAt: new Date(Date.now() - 172800000).toISOString() },
+    ]);
+    
+    setIsLoading(false);
+  }, []);
 
-    // Fetch data if authenticated
-    if (status === 'authenticated') {
-      // This would be replaced with actual API calls in a real implementation
-      setRecentSessions([
-        { id: 1, sessionName: 'Property Law Inquiry', startedAt: new Date().toISOString() },
-        { id: 2, sessionName: 'Business Registration', startedAt: new Date(Date.now() - 86400000).toISOString() },
-        { id: 3, sessionName: 'Employment Contract', startedAt: new Date(Date.now() - 172800000).toISOString() },
-      ]);
-      
-      setLegalNews([
-        { id: 1, title: 'New Tax Regulations for Small Businesses', publishedAt: new Date().toISOString() },
-        { id: 2, title: 'Changes to Property Law in Morocco', publishedAt: new Date(Date.now() - 86400000).toISOString() },
-        { id: 3, title: 'Supreme Court Ruling on Labor Disputes', publishedAt: new Date(Date.now() - 172800000).toISOString() },
-      ]);
-      
-      setIsLoading(false);
-    }
-  }, [status, router]);
-
-  if (status === 'loading' || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -48,24 +49,15 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">
-                Welcome, {session?.user?.name || 'User'}
-              </span>
-              <Link 
-                href="/api/auth/signout"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Sign out
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Use the new AppHeader component */}
+      <div className="mb-6">
+        <AppHeader />
+      </div>
+      
+      {/* Dashboard Title */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+      </div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
