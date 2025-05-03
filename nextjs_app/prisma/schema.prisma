@@ -3,7 +3,8 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
+  // Default output location that both packages can access
+  // output = "../web/app/generated/prisma"
 }
 
 datasource db {

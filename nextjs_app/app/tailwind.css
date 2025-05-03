@@ -1,7 +1,0 @@
-/* This file contains Tailwind CSS imports */
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Import this file in globals.css */
