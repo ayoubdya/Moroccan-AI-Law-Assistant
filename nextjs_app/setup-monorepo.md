@@ -1,10 +1,10 @@
 # Monorepo Setup Guide for Morocco Legal Assistant
 
-This guide explains the new monorepo structure for the Morocco Legal Assistant project and provides instructions for transitioning to this structure.
+This guide explains the monorepo structure for the Morocco Legal Assistant project and provides instructions for working with this structure.
 
 ## Why a Monorepo?
 
-We've implemented a monorepo structure to solve the issue of duplicate `node_modules` directories and to better organize our codebase. Benefits include:
+We've implemented a monorepo structure with npm workspaces to organize our codebase and optimize dependency management. With this approach, all dependencies are installed in a single `node_modules` folder at the root level. Benefits include:
 
 - Shared dependencies between packages
 - Simplified development workflow
@@ -89,7 +89,7 @@ If you encounter the error 'Unexpected token '<', "<!DOCTYPE "... is not valid J
 
 ### Package Installation
 
-When adding new packages:
+When adding new packages, use the workspace flag to specify which workspace the package should be added to. All packages will be installed in the single node_modules folder at the root level:
 
 ```bash
 # Add a package to the web workspace
@@ -98,9 +98,14 @@ npm install package-name --workspace=web
 # Add a package to the api workspace
 npm install package-name --workspace=api
 
-# Add a package to all workspaces
-npm install package-name -w
+# Add a shared package to the root (available to all workspaces)
+npm install package-name --save-dev
+
+# Add a development dependency to a specific workspace
+npm install package-name --workspace=web --save-dev
 ```
+
+This approach ensures that all dependencies are managed efficiently in a single node_modules folder, avoiding duplication and reducing disk space usage.
 
 ## Next Steps
 
