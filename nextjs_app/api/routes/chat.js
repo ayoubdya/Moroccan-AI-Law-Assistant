@@ -40,7 +40,7 @@ const upload = multer({
 
 // Chat session routes
 router.post('/sessions', auth, chatController.createSession);
-router.get('/sessions/:userId', auth, chatController.getUserSessions);
+router.get('/sessions/user/:userId', auth, chatController.getUserSessions);
 router.get('/sessions/:id', auth, chatController.getSession);
 router.post('/sessions/:id/messages', auth, chatController.addMessage);
 router.post('/sessions/:id/process', auth, chatController.processMessage);

@@ -14,7 +14,7 @@ const AppHeader = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 relative">
-              <div className="absolute inset-0 bg-blue-600 rounded-md flex items-center justify-center text-white font-bold text-xl">
+              <div className="absolute inset-0 bg-[#C7A962] rounded-md flex items-center justify-center text-white font-bold text-xl">
                 M
               </div>
             </div>
@@ -24,15 +24,15 @@ const AppHeader = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <div className="flex space-x-6 mr-4">
-              <Link href="/dashboard" className="text-gray-600 hover:text-blue-600 font-medium">
+              <Link href="/dashboard" className="text-gray-600 hover:text-[#C7A962] font-medium">
                 Dashboard
               </Link>
-              <Link href="/chat/new" className="text-gray-600 hover:text-blue-600 font-medium">
+              <Link href="/chat/new" className="text-gray-600 hover:text-[#C7A962] font-medium">
                 AI Consultant
               </Link>
             </div>
             <div className="flex items-center">
-              <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
+              <div className="h-8 w-8 rounded-full bg-[#C7A962] flex items-center justify-center text-white font-medium">
                 U
               </div>
             </div>
@@ -40,7 +40,7 @@ const AppHeader = () => {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2 rounded-md text-gray-600 hover:text-blue-600 focus:outline-none"
+            className="md:hidden p-2 rounded-md text-gray-600 hover:text-[#C7A962] focus:outline-none"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             title="Toggle mobile menu"
             aria-label="Toggle mobile menu"
