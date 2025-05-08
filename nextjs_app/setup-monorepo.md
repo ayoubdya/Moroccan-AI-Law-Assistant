@@ -107,6 +107,73 @@ npm install package-name --workspace=web --save-dev
 
 This approach ensures that all dependencies are managed efficiently in a single node_modules folder, avoiding duplication and reducing disk space usage.
 
+## Using Bun Instead of npm
+
+This project now supports using Bun as a faster alternative to npm. Bun is an all-in-one JavaScript runtime, package manager, and bundler that significantly improves development speed.
+
+### Why Use Bun?
+
+- **Faster Installation**: Bun installs dependencies much faster than npm
+- **Improved Performance**: JavaScript execution is significantly faster
+- **Built-in Watch Mode**: No need for nodemon for API development
+- **Workspace Support**: Bun supports workspaces similar to npm
+- **Single node_modules**: Maintains the efficient monorepo structure
+
+### Setting Up Bun
+
+1. **Install Bun**:
+   ```bash
+   # For Windows (using PowerShell with Admin rights)
+   powershell -c "irm https://bun.sh/install.ps1 | iex"
+   ```
+
+2. **Clean existing node_modules** (if switching from npm):
+   ```bash
+   # From the root directory
+   bun run clean
+   ```
+
+3. **Install dependencies with Bun**:
+   ```bash
+   # From the root directory
+   bun install
+   ```
+
+4. **Generate Prisma client**:
+   ```bash
+   # From the root directory
+   bunx prisma generate
+   ```
+
+5. **Run the project**:
+   ```bash
+   # Start both frontend and backend
+   bun run dev
+   ```
+
+### Adding New Packages with Bun
+
+To add new packages while maintaining the monorepo structure:
+
+```bash
+# Add a package to the web workspace
+bun add package-name --cwd web
+
+# Add a package to the api workspace
+bun add package-name --cwd api
+
+# Add a shared package to the root
+bun add package-name --dev
+```
+
+### Handling Native Modules
+
+The package.json files have been configured with `trustedDependencies` to handle native modules like bcrypt when using Bun:
+
+```json
+"trustedDependencies": ["bcrypt"]
+```
+
 ## Next Steps
 
 1. Complete the user registration and login functionality

@@ -92,7 +92,7 @@ The application uses Prisma ORM with a SQLite database with the following models
 
 ### Prerequisites
 
-- **Node.js 18+** and npm (We recommend using [nvm](https://github.com/nvm-sh/nvm) to manage Node.js versions)
+- **Node.js 18+** and npm (We recommend using [nvm](https://github.com/nvm-sh/nvm) to manage Node.js versions) OR **Bun** as a faster alternative
 - **Git** for version control
 - A code editor like **VS Code** with extensions for React, TypeScript, and Tailwind CSS
 
@@ -105,10 +105,21 @@ The application uses Prisma ORM with a SQLite database with the following models
    ```
 
 2. **Install dependencies**
-   The project uses a monorepo structure with npm workspaces, which means all dependencies are installed in a single node_modules folder at the root level.
+   The project uses a monorepo structure with workspaces, which means all dependencies are installed in a single node_modules folder at the root level.
+   
+   **Using npm:**
    ```bash
    # Install all dependencies (this will install dependencies for all workspaces)
    npm install
+   ```
+   
+   **Using Bun (recommended for faster installation):**
+   ```bash
+   # Install Bun if you haven't already (Windows PowerShell with admin rights)
+   powershell -c "irm https://bun.sh/install.ps1 | iex"
+   
+   # Install all dependencies with Bun
+   bun install
    ```
    
    This command will read the package.json files from both the web and api directories and install all dependencies in a single node_modules folder at the root level, which helps reduce disk space usage and improves installation speed.
@@ -127,33 +138,48 @@ The application uses Prisma ORM with a SQLite database with the following models
 
 4. **Set up the database**
    ```bash
-   # From the web directory
-   cd web
+   # From the root directory
    
-   # Generate Prisma client
+   # Using npm:
    npx prisma generate
-   
-   # Run database migrations
    npx prisma migrate dev
+   npx prisma db seed # optional
    
-   # Seed the database with initial data (optional)
-   npx prisma db seed
+   # Using Bun:
+   bunx prisma generate
+   bunx prisma migrate dev
+   bunx prisma db seed # optional
    ```
 
 5. **Start the development servers**
-   You need to run both the frontend and backend servers simultaneously.
+   You can run both the frontend and backend servers simultaneously with a single command from the root directory.
    
    ```bash
-   # Terminal 1: Start the backend API server (from the api directory)
-   cd api
-   npm start
-   # The API server will run on http://localhost:5000
-   
-   # Terminal 2: Start the frontend Next.js server (from the web directory)
-   cd web
+   # Using npm:
    npm run dev
-   # The frontend will run on http://localhost:3000
+   
+   # Using Bun:
+   bun run dev
    ```
+   
+   Or start them separately if needed:
+   
+   ```bash
+   # Using npm:
+   # Terminal 1: Start the backend API server
+   npm run dev:api
+   # Terminal 2: Start the frontend Next.js server
+   npm run dev:web
+   
+   # Using Bun:
+   # Terminal 1: Start the backend API server
+   bun run dev:api
+   # Terminal 2: Start the frontend Next.js server
+   bun run dev:web
+   ```
+   
+   - The frontend will run on http://localhost:3000
+   - The API server will run on http://localhost:5000
 
 6. **Access the application**
    - Frontend: [http://localhost:3000](http://localhost:3000)
@@ -174,30 +200,71 @@ The application uses Prisma ORM with a SQLite database with the following models
 
 1. **Build the frontend**
    ```bash
-   cd web
+   # Using npm:
    npm run build
+   
+   # Using Bun:
+   bun run build
    ```
 
 2. **Start the production servers**
    ```bash
-   # Start the backend API server
-   cd ../api
-   npm start
+   # Using npm:
+   npm run start
    
-   # Start the frontend server
-   cd ../web
-   npm start
+   # Using Bun:
+   bun run start
    ```
+   
+   Or start them separately if needed:
+   
+   ```bash
+   # Using npm:
+   npm run start:api
+   npm run start:web
+   
+   # Using Bun:
+   bun run start:api
+   bun run start:web
+   ```
+
+## Using Bun Instead of npm
+
+This project supports using Bun as a faster alternative to npm. Bun is an all-in-one JavaScript runtime, package manager, and bundler that significantly improves development speed.
+
+### Benefits of Using Bun
+
+- **Faster Installation**: Bun installs dependencies much faster than npm
+- **Improved Performance**: JavaScript execution is significantly faster
+- **Built-in Watch Mode**: No need for nodemon for API development
+- **Workspace Support**: Bun supports workspaces similar to npm
+- **Single node_modules**: Maintains the efficient monorepo structure
+
+### Installation
+
+```bash
+# For Windows (using PowerShell with Admin rights)
+powershell -c "irm https://bun.sh/install.ps1 | iex"
+```
+
+### Common Issues with Native Modules
+
+If you encounter issues with native modules like bcrypt when using Bun:
+
+1. Make sure you have build tools installed
+2. The project has been configured with `trustedDependencies` in the package.json files to handle native modules
 
 ## Project Maintenance and Best Practices
 
 ### Monorepo Structure
 
-This project uses a monorepo structure with npm workspaces to manage dependencies efficiently. Key points to understand:
+This project uses a monorepo structure with workspaces to manage dependencies efficiently. Key points to understand:
 
 1. **Single node_modules Directory**: All dependencies are installed in a single `node_modules` directory at the root level, reducing disk space usage and improving installation speed.
 
 2. **Workspace Configuration**: The root `package.json` contains a `workspaces` field that specifies the packages in the monorepo (`web` and `api`).
+
+3. **Package Manager Options**: The project supports both npm and Bun as package managers. Bun is recommended for faster installation and execution times.
 
 3. **Package Management**: Always run `npm install` from the root directory to ensure dependencies are correctly installed for all workspaces.
 
