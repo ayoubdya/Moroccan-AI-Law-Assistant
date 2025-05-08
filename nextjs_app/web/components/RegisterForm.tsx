@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { post } from '../lib/api';
+import { authApi } from '../lib/api-client';
+import { RegisterResponse } from '../types/api';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -70,11 +71,11 @@ export default function RegisterForm() {
     
     try {
       // Call the backend API to register the user
-      const response = await post('/api/auth/register', {
+      const response = await authApi.register({
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password
-      });
+      }) as RegisterResponse | { status: string; message?: string };
       
       if (response.status === 'success') {
         // Redirect to login page on successful registration

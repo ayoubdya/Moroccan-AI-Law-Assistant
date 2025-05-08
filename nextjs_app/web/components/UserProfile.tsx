@@ -2,21 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { get } from '../lib/api';
+import { userApi } from '../lib/api-client';
+import { UserProfile as UserProfileType } from '../types/api';
 
-type User = {
-  id: string;
-  fullName: string;
-  email: string;
-  createdAt: string;
-  _count?: {
-    chatSessions: number;
-  };
-};
+// Using the UserProfile type from API types
+// type User = {
+//   id: string;
+//   fullName: string;
+//   email: string;
+//   createdAt: string;
+//   _count?: {
+//     chatSessions: number;
+//   };
+// };
 
 export default function UserProfile() {
   const { data: session, status } = useSession();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserProfileType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -29,31 +31,15 @@ export default function UserProfile() {
       // Try to get data from the API
       try {
         console.log('Attempting to fetch user data from API...');
-        // Check if the API server is running before making the request
-        try {
-          // Make a simple ping request to check if the API is available
-          const pingResponse = await fetch(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000', { method: 'HEAD' });
-          console.log(`API server ping status: ${pingResponse.status}`);
-        } catch (pingError) {
-          console.error('API server appears to be offline:', pingError);
-          throw new Error('API server appears to be offline. Using session data instead.');
-        }
+        const response = await userApi.getProfile();
+        console.log('API response:', response);
         
-        const data = await get('/api/users/me');
-        console.log('API response:', data);
-        
-        if (data && data.status === 'success' && data.user) {
-          // Standard API response format with user data
-          setUser(data.user);
-          console.log('Successfully loaded user data from API', data.user);
-          return;
-        } else if (data && data.id) {
-          // Direct user object returned
-          setUser(data);
-          console.log('Successfully loaded user data from API', data);
+        if (response) {
+          setUser(response);
+          console.log('Successfully loaded user data from API', response);
           return;
         } else {
-          console.log('API returned invalid data format:', data);
+          console.log('API returned invalid data format');
           throw new Error('Invalid data format received from API');
         }
       } catch (apiErr) {
@@ -65,14 +51,13 @@ export default function UserProfile() {
       // Fall back to session data if API fails or returns invalid data
       if (session?.user) {
         console.log('Using session data as fallback');
-        const sessionUser: User = {
+        const sessionUser: UserProfileType = {
           id: session.user.id || 'session-id',
-          fullName: session.user.name || 'User',
           email: session.user.email || '',
+          name: session.user.name || 'User',
+          role: 'user',
           createdAt: new Date().toISOString(),
-          _count: {
-            chatSessions: 0 // Default value since we don't have this from session
-          }
+          updatedAt: new Date().toISOString()
         };
         setUser(sessionUser);
       } else {
@@ -81,6 +66,7 @@ export default function UserProfile() {
     } catch (err) {
       console.error('Error fetching user data:', err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -136,9 +122,9 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md border border-gray-200">
+    <div className="p-6 bg-white rounded-lg shadow-md border border-gray-200 border-solid">
       {error && (
-        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-md">
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 border-solid text-amber-800 rounded-md">
           <div className="flex items-center mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -158,7 +144,7 @@ export default function UserProfile() {
       )}
       <div className="flex items-center mb-6">
         <div className="w-16 h-16 rounded-full bg-[#F5EFD9] flex items-center justify-center text-[#C7A962] font-bold text-2xl mr-4">
-          {user?.fullName?.charAt(0).toUpperCase() || session?.user?.name?.charAt(0).toUpperCase() || '?'}
+          {user?.name?.charAt(0).toUpperCase() || session?.user?.name?.charAt(0).toUpperCase() || '?'}
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-800">User Profile</h2>
@@ -175,7 +161,7 @@ export default function UserProfile() {
               </svg>
               Full Name
             </h3>
-            <p className="text-gray-700 text-lg">{user.fullName}</p>
+            <p className="text-gray-700 text-lg">{user.name}</p>
           </div>
           
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
@@ -198,18 +184,15 @@ export default function UserProfile() {
             <p className="text-gray-700 text-lg">{new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
           
-          {user._count && (
+          {user.profession && (
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-700 mb-2 flex items-center">
                 <svg className="w-5 h-5 mr-2 text-[#C7A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                Chat Sessions
+                Profession
               </h3>
-              <div className="flex items-center">
-                <span className="text-2xl font-bold text-[#C7A962]">{user._count.chatSessions}</span>
-                <span className="ml-2 text-gray-600">sessions</span>
-              </div>
+              <p className="text-gray-700 text-lg">{user.profession}</p>
             </div>
           )}
           

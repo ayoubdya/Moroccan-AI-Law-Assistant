@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import ProtectedRoute from '../../components/ProtectedRoute';
-import { getUserSessions, createChatSession, loadChatSession as fetchChatSession, sendChatMessage, checkApiAvailability } from '../../../lib/chatApi';
+import { chatApi } from '../../../lib/chatApi';
 
 // Define types for messages and chat history
 type Message = {
@@ -31,7 +31,7 @@ type ChatSession = {
 async function createChatSessionWrapper(userId: string) {
   try {
     // The imported createChatSession doesn't need userId as it's handled by the API utility
-    const result = await createChatSession(sessionName);
+    const result = await chatApi.createChatSession('New Consultation');
     return result;
   } catch (error) {
     console.error('Error creating chat session:', error);
@@ -46,7 +46,7 @@ async function getUserSessionsWrapper(userId: string) {
   try {
     // The imported getUserSessions doesn't need userId as it's handled by the API utility
     console.log(`Fetching sessions for user ${userId} using centralized API utility`);
-    const result = await getUserSessions();
+    const result = await chatApi.getUserSessions();
     return result;
   } catch (error) {
     console.error('Error fetching user sessions:', error);
@@ -64,7 +64,7 @@ async function getUserSessionsWrapper(userId: string) {
 async function sendMessage(sessionId: string, message: string) {
   try {
     console.log(`Sending message to session ${sessionId} using centralized API utility`);
-    const result = await sendChatMessage(sessionId, message);
+    const result = await chatApi.sendChatMessage(sessionId, message);
     console.log('Message sent successfully:', result);
     return result;
   } catch (error) {
@@ -84,7 +84,15 @@ export default function AIConsultantPage() {
   const [sessionTitle, setSessionTitle] = useState('New Consultation');
   const [showSidebar, setShowSidebar] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [userSessions, setUserSessions] = useState<ChatSession[]>([]);
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  
+  // Type for session list items
+  interface SessionListItem {
+    id: string;
+    title: string;
+    createdAt: Date;
+    category: string;
+  }
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Set up authentication for API requests
@@ -120,7 +128,7 @@ export default function AIConsultantPage() {
         category: 'Employment'
       }
     ];
-    setUserSessions(mockSessions);
+    setSessions(mockSessions);
   };
   
   // Fetch user sessions when component mounts
@@ -129,7 +137,7 @@ export default function AIConsultantPage() {
       if (session?.user?.id) {
         try {
           // First check if API is available before attempting to fetch data
-          const isApiAvailable = await checkApiAvailability();
+          const isApiAvailable = await chatApi.checkApiAvailability();
           
           if (!isApiAvailable) {
             console.warn('API server is not available, using mock data');
@@ -138,18 +146,18 @@ export default function AIConsultantPage() {
           }
           
           // API is available, attempt to fetch user sessions
-          const data = await getUserSessions();
+          const data = await chatApi.getUserSessions();
           console.log('Fetched user sessions response:', data);
           
-          if (data.status === 'success' && Array.isArray(data.sessions)) {
+          if (data.status === 'success' && data.data?.sessions) {
             // Convert API sessions to our ChatSession format
-            const formattedSessions = data.sessions.map((apiSession: any) => ({
+            const formattedSessions = data.data.sessions.map((apiSession: any) => ({
               id: apiSession.id.toString(),
               title: apiSession.sessionName || 'Untitled Consultation',
               date: new Date(apiSession.startedAt),
               category: apiSession.category || 'General'
             }));
-            setUserSessions(formattedSessions);
+            setSessions(formattedSessions);
           } else {
             // API returned error or unexpected format
             console.error('API error or unexpected format:', data);
@@ -199,7 +207,7 @@ export default function AIConsultantPage() {
     
     // Add user message to UI immediately for better UX
     const userMessage: Message = {
-      id: `msg-${Date.now()}`,
+      id: Date.now().toString(),
       role: 'user',
       content: inputMessage,
       timestamp: new Date()
@@ -212,7 +220,7 @@ export default function AIConsultantPage() {
     
     try {
       // Check if API is reachable before attempting to send message
-      const apiAvailable = await checkApiAvailability();
+      const apiAvailable = await chatApi.checkApiAvailability();
       
       if (!apiAvailable) {
         throw new Error('API server is unreachable');
@@ -222,14 +230,14 @@ export default function AIConsultantPage() {
       if (!currentSessionId && session?.user?.id) {
         try {
           console.log('Creating new chat session for user:', session.user.id);
-          const result = await createChatSession('New Consultation');
+          const result = await chatApi.createChatSession('New Consultation');
           console.log('New session created:', result);
           
-          if (result.status === 'success' && result.session) {
-            setCurrentSessionId(result.session.id.toString());
-            setSessionTitle(result.session.sessionName || 'New Consultation');
+          if (result.status === 'success' && result.data?.session) {
+            setCurrentSessionId(result.data.session.id.toString());
+            setSessionTitle(result.data.session.title || 'New Consultation');
           } else {
-            throw new Error('Failed to create session: ' + (result.message || 'Unknown error'));
+            throw new Error('Failed to create session: ' + (result.error || 'Unknown error'));
           }
         } catch (sessionError) {
           console.error('Failed to create new session:', sessionError);
@@ -240,14 +248,14 @@ export default function AIConsultantPage() {
       
       // If we have a session ID, send message to API
       if (currentSessionId) {
-        const response = await sendMessage(currentSessionId, inputMessage);
+        const response = await chatApi.sendChatMessage(currentSessionId, inputMessage);
         console.log('API response:', response);
         
-        if (response.status === 'success' && response.botResponse) {
+        if (response.status === 'success' && response.data) {
           const botResponse: Message = {
             id: `msg-${Date.now()}`,
             role: 'assistant',
-            content: response.botResponse.message,
+            content: response.data.assistantMessage.content,
             timestamp: new Date()
           };
           
@@ -290,7 +298,7 @@ export default function AIConsultantPage() {
         
         // Also update the session in the sidebar if we have a session ID
         if (currentSessionId) {
-          setUserSessions(prev => {
+          setSessions(prev => {
             const updated = prev.map(s => 
               s.id === currentSessionId ? { ...s, title: newTitle } : s
             );
@@ -301,8 +309,6 @@ export default function AIConsultantPage() {
     }, 1500);
   };
   
-  // This function is already defined above, so we're removing this duplicate
-
   // Generate a mock response when API is unavailable
   const generateMockResponse = (query: string): string => {
     // Convert query to lowercase for easier matching
@@ -346,16 +352,16 @@ export default function AIConsultantPage() {
       console.log(`Loading chat session ${sessionId} using centralized API utility`);
       
       // Use the imported fetchChatSession function from chatApi.ts
-      const data = await fetchChatSession(sessionId);
+      const data = await chatApi.loadChatSession(sessionId);
       
-      if (data.status === 'success' && data.session) {
+      if (data.status === 'success' && data.data?.session) {
         // Set the current session ID and title
         setCurrentSessionId(sessionId);
-        setSessionTitle(data.session.sessionName || 'Untitled Consultation');
+        setSessionTitle(data.data.session.title || 'Untitled Consultation');
         
         // Convert API messages to our Message format
-        if (Array.isArray(data.session.messages) && data.session.messages.length > 0) {
-          const formattedMessages: Message[] = data.session.messages.map((apiMessage: any) => ({
+        if (data.data.session.messages && data.data.session.messages.length > 0) {
+          const formattedMessages: Message[] = data.data.session.messages.map((apiMessage: any) => ({
             id: apiMessage.id.toString(),
             role: apiMessage.role as 'user' | 'assistant',
             content: apiMessage.content,
@@ -375,17 +381,21 @@ export default function AIConsultantPage() {
         }
         
         // Update session in sidebar if needed
-        setUserSessions(prev => {
+        setSessions(prev => {
           // Check if session already exists in sidebar
           const exists = prev.some(s => s.id === sessionId);
           if (!exists) {
             // Add session to sidebar if it doesn't exist
-            return [...prev, {
+            const newSession: ChatSession = {
               id: sessionId,
-              title: data.session.sessionName || 'Untitled Consultation',
-              date: new Date(data.session.startedAt || Date.now()),
-              category: data.session.category || 'General'
-            }];
+              title: data.data.session.title || 'Untitled Consultation',
+              userId: session.user.id,
+              createdAt: data.data.session.createdAt,
+              updatedAt: data.data.session.createdAt,
+              messages: [],
+              date: new Date(data.data.session.createdAt)
+            };
+            return [...prev, newSession];
           }
           return prev;
         });
@@ -429,7 +439,8 @@ export default function AIConsultantPage() {
     if (session?.user?.id) {
       try {
         // Check if API is available before attempting to create a session
-        const isApiAvailable = await checkApiAvailability();
+        const isApiAvailable = await chatApi.checkApiAvailability();
+        
         if (!isApiAvailable) {
           console.warn('API server is not available, using client-side only mode');
           // We already added the welcome message, so just return
@@ -439,18 +450,18 @@ export default function AIConsultantPage() {
         
         // Create a new session via API using the centralized API utility
         console.log('Creating new chat session for user:', session.user.id);
-        const result = await createChatSession('New Consultation');
+        const result = await chatApi.createChatSession('New Consultation');
         console.log('New session created:', result);
         
-        if (result.status === 'success' && result.session) {
-          setCurrentSessionId(result.session.id.toString());
-          setSessionTitle(result.session.sessionName || 'New Consultation');
+        if (result.status === 'success' && result.data?.session) {
+          setCurrentSessionId(result.data.session.id.toString());
+          setSessionTitle(result.data.session.title || 'New Consultation');
           
           // Refresh the user sessions list
           try {
-            const sessionsData = await getUserSessions();
-            if (sessionsData.status === 'success' && Array.isArray(sessionsData.sessions)) {
-              const formattedSessions = sessionsData.sessions.map((apiSession: any) => ({
+            const sessionsData = await chatApi.getUserSessions();
+            if (sessionsData.status === 'success' && sessionsData.data?.sessions) {
+              const formattedSessions = sessionsData.data.sessions.map((apiSession: any) => ({
                 id: apiSession.id.toString(),
                 title: apiSession.sessionName || 'Untitled Consultation',
                 date: new Date(apiSession.startedAt),
