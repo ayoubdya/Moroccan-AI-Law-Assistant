@@ -1,6 +1,6 @@
-import { PineconeDatabase } from "@/modules/database";
-import { Gemini } from "@/modules/model";
-import { buildDocsPrompt, SystemPrompt } from "@/extensions/promptBuilder";
+import { PineconeDatabase } from "@/module/database";
+import { Gemini } from "@/module/model";
+import { buildDocsPrompt, SystemPrompt } from "@/extension/promptBuilder";
 
 import { NextRequest, NextResponse } from "next/server";
 import { Content } from "@google/genai";

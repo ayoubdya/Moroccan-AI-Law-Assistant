@@ -1,8 +1,6 @@
-import type { QueryResult } from "@/modules/types";
+import type { QueryResult } from "@/module/types";
 
-export function buildDocsPrompt(
-  resultQuery: QueryResult[]
-): string {
+export function buildDocsPrompt(resultQuery: QueryResult[]): string {
   const ragTexts = resultQuery.map((res) => {
     const metaStr = `res.metadata.chunk_text , Category : ${res.metadata.Category}`;
 
@@ -16,7 +14,6 @@ export function buildDocsPrompt(
     ${docs}
     `.trim();
 }
-
 
 export const SystemPrompt = `    
 
@@ -33,4 +30,4 @@ export const SystemPrompt = `
     3. Practical Recommendation  
         Advise the user on the next steps they should take under Moroccan law.
     
-`.trim()
+`.trim();

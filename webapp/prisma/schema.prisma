@@ -19,18 +19,19 @@ enum Role {
 }
 
 model User {
-  id    String @id @db.Uuid
-  name  String
+  id    String @id @default(uuid()) @db.Uuid 
   email String @unique
+  firstName String
+  lastName String 
   password String
   role  Role?
 
-  Season Season[]
+  Season Session[]
   chats Chat[]
 }
 
-model Season {
-  id        String   @id @db.Uuid
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
   userId    String   @db.Uuid
   title     String
   startDate DateTime @default(now())
@@ -44,19 +45,19 @@ model Season {
 }
 
 model Chat{
-  id    String   @id @db.Uuid
+  id    String   @id @default(uuid()) @db.Uuid
   userId    String   @db.Uuid
-  seasonId String     @db.Uuid
+  sessionId String     @db.Uuid
   sender Sender 
   message String @db.Text
   sentAt DateTime @updatedAt
   
 
-  season    Season    @relation(fields: [seasonId],references: [id], onDelete: Cascade)
+  season    Session    @relation(fields: [sessionId],references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
 
   @@index([userId])
-  @@index([seasonId])
+  @@index([sessionId])
 }
 
