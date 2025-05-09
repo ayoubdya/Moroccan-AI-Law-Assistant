@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Sender {
+  user
+  model
+}
+enum Role {
+  student
+  lawyer
+  judge
+}
+
+model User {
+  id    String @id @db.Uuid
+  name  String
+  email String @unique
+  password String
+  role  Role?
+
+  Season Season[]
+  chats Chat[]
+}
+
+model Season {
+  id        String   @id @db.Uuid
+  userId    String   @db.Uuid
+  title     String
+  startDate DateTime @default(now())
+
+  Chat Chat[]
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+
+}
+
+model Chat{
+  id    String   @id @db.Uuid
+  userId    String   @db.Uuid
+  seasonId String     @db.Uuid
+  sender Sender 
+  message String @db.Text
+  sentAt DateTime @updatedAt
+  
+
+  season    Season    @relation(fields: [seasonId],references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+
+  @@index([userId])
+  @@index([seasonId])
+}
+
