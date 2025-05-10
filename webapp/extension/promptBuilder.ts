@@ -9,7 +9,7 @@ export function buildDocsPrompt(resultQuery: QueryResult[]): string {
 
   const docs = ragTexts.join(", ");
   return `
-     Use ONLY the following documents as your source:
+     Use ONLY the following documents as your source:  
     
     ${docs}
     `.trim();
