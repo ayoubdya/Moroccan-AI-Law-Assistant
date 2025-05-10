@@ -2,10 +2,6 @@ import { PrismaClient, User, Role } from "../generated/prisma";
 
 const prisma = new PrismaClient();
 
-
-
-
-
 export const userService = {
   async create(data: {
     firstName: string;

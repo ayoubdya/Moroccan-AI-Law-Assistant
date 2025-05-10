@@ -1,4 +1,9 @@
-import { GoogleGenAI, type ContentListUnion } from "@google/genai";
+import {
+  GoogleGenAI,
+  type ContentListUnion,
+  type Content,
+} from "@google/genai";
+import { Chat, Sender } from "@/app/generated/prisma";
 import type { QueryResult } from "./types";
 
 export class Gemini {
@@ -45,5 +50,33 @@ export class Gemini {
         yield chunk.text;
       }
     }
+  }
+
+  public chatsToContents(chats: Chat[]): Content[] {
+    return chats.map((chat) => this.chatToContent(chat));
+  }
+
+  public async promptPromise(TittlePromptInput: Content[]): Promise<string> {
+    let fullText = "";
+
+    for await (const chunk of this.prompt(TittlePromptInput)) {
+      fullText += chunk;
+    }
+
+    return fullText;
+  }
+
+  public messagesToContentsUser(msgs: string[]): Content[] {
+    return msgs.map((msg) => ({
+      role: "user",
+      parts: [{ text: msg }],
+    }));
+  }
+
+  private chatToContent(chat: Chat): Content {
+    return {
+      role: chat.sender,
+      parts: [{ text: chat.message }],
+    };
   }
 }

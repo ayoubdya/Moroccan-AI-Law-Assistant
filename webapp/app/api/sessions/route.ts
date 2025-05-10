@@ -2,10 +2,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sessionService } from "@/app/services/sessionService";
 import { z } from "zod";
+import { TitlePrompt } from "@/extension/promptBuilder";
+import { Gemini } from "@/module/model";
+
+
+const gemini = new Gemini();
+
 
 const PAGE_SIZE = 10;
 
-// Zod schema for GET query params
 const getSessionsQuerySchema = z.object({
   userId: z.string().uuid(),
   cursor: z.string().uuid().optional(),
@@ -16,10 +21,9 @@ const getSessionsQuerySchema = z.object({
     .pipe(z.number().int().positive()),
 });
 
-// Zod schema for POST body
 const createSessionSchema = z.object({
   userId: z.string().uuid(),
-  title: z.string().min(1, "Title is required"),
+  prompt: z.string().min(1, "Prompt is required"),
 });
 
 export async function GET(req: NextRequest) {
@@ -55,7 +59,13 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, title } = createSessionSchema.parse(body);
+    const { userId, prompt } = createSessionSchema.parse(body);
+
+    const TitlePromptInput = gemini.messagesToContentsUser([
+      TitlePrompt,
+      prompt,
+    ]);
+    const title = await gemini.promptPromise(TitlePromptInput);
 
     const session = await sessionService.create({ userId, title });
     return NextResponse.json(session, { status: 201 });
