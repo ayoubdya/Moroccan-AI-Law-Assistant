@@ -39,11 +39,15 @@ export class PineconeDatabase extends Database<SchemaWithCategory> {
         id: item.id,
         values: item.vector,
         metadata: item.metadata,
-      })),
+      }))
     );
   }
 
-  async query(queryVector: number[], topK = 10): Promise<QueryResult[]> {
+  async query(
+    queryVector: number[],
+    topK = 10,
+    minScore = 0.35
+  ): Promise<QueryResult[]> {
     const results = await this.index.searchRecords({
       query: {
         topK,
@@ -54,14 +58,16 @@ export class PineconeDatabase extends Database<SchemaWithCategory> {
       fields: ["chunk_text", "category"],
     });
 
-    return results.result.hits.map((hit) => ({
-      id: hit._id,
-      score: +hit._score.toFixed(4),
-      metadata: {
-        chunk_text: (hit.fields as SchemaWithCategory["metadata"]).chunk_text,
-        category: (hit.fields as SchemaWithCategory["metadata"]).category,
-      },
-    }));
+    return results.result.hits
+      .filter((hit) => hit._score !== undefined && hit._score >= minScore)
+      .map((hit) => ({
+        id: hit._id,
+        score: +hit._score.toFixed(4),
+        metadata: {
+          chunk_text: (hit.fields as SchemaWithCategory["metadata"]).chunk_text,
+          category: (hit.fields as SchemaWithCategory["metadata"]).category,
+        },
+      }));
   }
 
   async createIndex(name: string, dimension = 768): Promise<void> {

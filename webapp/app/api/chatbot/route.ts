@@ -1,4 +1,4 @@
-// webapp/app/api/chatbot/history/route.ts
+// webapp/app/api/chatbot/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -82,8 +82,17 @@ export async function POST(req: NextRequest) {
 
   const emb = await gemini.embedContent([prompt]);
   const top = await database.query(emb[0]!, DOC_COUNT);
+
   const docsPrompt = buildDocsPrompt(top);
 
+  if (docsPrompt) {
+    chatService.create({
+      userId,
+      sessionId: sessionId,
+      sender: Sender.user,
+      message: docsPrompt,
+    });
+  }
   const stream = new ReadableStream({
     async start(ctrl) {
       const enc = new TextEncoder();
@@ -95,10 +104,7 @@ export async function POST(req: NextRequest) {
         10
       );
 
-      const sysPrompt = gemini.messagesToContentsUser([
-        SystemPrompt,
-        docsPrompt,
-      ]);
+      const sysPrompt = gemini.messagesToContentsUser([SystemPrompt]);
 
       const history = gemini.chatsToContents(recentChats);
 
