@@ -1,0 +1,31 @@
+{
+  "name": "morocco-legal-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "web",
+    "api"
+  ],
+  "scripts": {
+    "dev": "concurrently \"bun run dev:web\" \"bun run dev:api\"",
+    "dev:web": "cd web && bun run dev",
+    "dev:api": "cd api && bun run dev",
+    "build": "bun run build:web",
+    "build:web": "cd web && bun run build",
+    "start": "concurrently \"bun run start:web\" \"bun run start:api\"",
+    "start:web": "cd web && bun run start",
+    "start:api": "cd api && bun run start",
+    "lint": "cd web && bun run lint",
+    "prisma:generate": "bunx prisma generate",
+    "prisma:migrate": "bunx prisma migrate dev",
+    "prisma:studio": "bunx prisma studio",
+    "postinstall": "bun run prisma:generate",
+    "setup": "bun install",
+    "clean": "rimraf node_modules web/node_modules api/node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prisma": "^6.7.0",
+    "rimraf": "^5.0.5"
+  }
+}
