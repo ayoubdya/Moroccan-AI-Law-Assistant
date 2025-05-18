@@ -38,3 +38,5 @@ coverage/
 # Misc
 *.swp
 .idea/
+/webapp/.next
+/webapp/app/generated
