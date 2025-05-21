@@ -9,6 +9,8 @@ import { buildDocsPrompt, SystemPrompt } from "@/extension/promptBuilder";
 import { chatService } from "@/app/services/chatService";
 import { Sender } from "@/app/generated/prisma";
 
+import { TranslateText } from "@/extension/translationManager";
+
 const gemini = new Gemini();
 const database = new PineconeDatabase("moroccan-law-db");
 
@@ -80,7 +82,17 @@ export async function POST(req: NextRequest) {
     message: prompt,
   });
 
-  const emb = await gemini.embedContent([prompt]);
+  let promptEng: string;
+  try {
+    const { translatedText } = await TranslateText(prompt);
+    promptEng = translatedText;
+  } catch (error) {
+    console.error("Translation failed, using original prompt:", error);
+    promptEng = prompt;
+  }
+
+  const emb = await gemini.embedContent([promptEng]);
+
   const top = await database.query(emb[0]!, DOC_COUNT);
 
   const docsPrompt = buildDocsPrompt(top);

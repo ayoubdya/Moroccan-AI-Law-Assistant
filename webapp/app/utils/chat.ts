@@ -7,6 +7,7 @@ const API_URL = "/api";
 // Create or retrieve a session (deferred until first user prompt)
 export async function getSession(prompt: string): Promise<Session> {
   const user = getUser();
+
   if (!user?.userId) throw new Error("Not authenticated");
   const res = await fetch(`${API_URL}/sessions`, {
     method: "POST",
