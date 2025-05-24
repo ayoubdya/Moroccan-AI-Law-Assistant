@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
       sessionId: sessionId,
       sender: Sender.user,
       message: docsPrompt,
+      type: "docs",
     });
   }
   const stream = new ReadableStream({

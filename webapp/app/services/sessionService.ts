@@ -1,4 +1,4 @@
-import { PrismaClient, Session } from '../generated/prisma';
+import { PrismaClient, Session, Prisma } from '../generated/prisma';
 const prisma = new PrismaClient();
 
 export const sessionService = {
@@ -14,10 +14,12 @@ export const sessionService = {
     });
   },
 
-  async findById(id: string): Promise<Session | null> {
+  async findById(id: string): Promise<Prisma.SessionGetPayload<{
+    include: { Chat: true };
+  }> | null> {
     return prisma.session.findUnique({
       where: { id },
-      include: { Chat: true, user: true },
+      include: { Chat: true },
     });
   },
 

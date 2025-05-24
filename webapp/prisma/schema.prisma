@@ -12,52 +12,55 @@ enum Sender {
   user
   model
 }
+
 enum Role {
   student
   lawyer
   judge
 }
 
+enum ChatType {
+  docs
+  chat
+}
+
 model User {
-  id    String @id @default(uuid()) @db.Uuid 
-  email String @unique
+  id        String @id @default(uuid())
+  email     String @unique
   firstName String
-  lastName String 
-  password String
-  role  Role?
+  lastName  String
+  password  String
+  role      Role?
 
   Season Session[]
-  chats Chat[]
+  chats  Chat[]
 }
 
 model Session {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
+  id        String   @id @default(uuid())
+  userId    String
   title     String
   startDate DateTime @default(now())
 
   Chat Chat[]
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-
 }
 
-model Chat{
-  id    String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
-  sessionId String     @db.Uuid
-  sender Sender 
-  message String @db.Text
-  sentAt DateTime @updatedAt
-  
+model Chat {
+  id        String   @id @default(uuid())
+  userId    String
+  sessionId String
+  sender    Sender
+  message   String
+  type      ChatType @default(chat)
+  sentAt    DateTime @updatedAt
 
-  season    Session    @relation(fields: [sessionId],references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  season Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([sessionId])
 }
-

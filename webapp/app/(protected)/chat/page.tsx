@@ -5,6 +5,8 @@ import ChatMessage from "../../components/chat/ChatMessage";
 import ChatInput from "../../components/chat/ChatInput";
 import { getSession } from "../../utils/chat";
 import styles from "../../components/chat/chat.module.css";
+import { sessionsApi } from "@/app/utils/api";
+import { Prisma } from "@/app/generated/prisma";
 
 interface Message {
   id: string;
@@ -18,6 +20,39 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // get sessionId from url
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sid = urlParams.get("session");
+    if (sid) {
+      setSessionId(sid);
+      sessionsApi.getSessionById(sid).then((session: Prisma.SessionGetPayload<{
+        include: { Chat: true }
+      }>) => {
+        setLoading(true);
+        const formattedMessages = session.Chat.filter((chat) => chat.type === "chat").map((msg) => ({
+          id: msg.id,
+          content: msg.message,
+          sender: msg.sender,
+          timestamp: new Date(msg.sentAt),
+        }));
+        setMessages(formattedMessages);
+      }).catch((err) => {
+        console.error("Failed to fetch session messages:", err);
+        setMessages([
+          {
+            id: "err",
+            content: "Could not load chat history.",
+            sender: "model",
+            timestamp: new Date(),
+          },
+        ]);
+      }).finally(() => {
+        setLoading(false);
+      });
+    }
+  }, []);
 
   // auto-scroll
   useEffect(() => {

@@ -1,19 +1,27 @@
-import { PrismaClient, Chat, Sender } from "../generated/prisma";
+import { PrismaClient, Chat, Sender, ChatType } from "../generated/prisma";
 const prisma = new PrismaClient();
 
 export const chatService = {
-  async create(data: {
+  async create({
+    userId,
+    sessionId,
+    sender,
+    message,
+    type = "chat"
+  }: {
     userId: string;
     sessionId: string;
     sender: Sender;
     message: string;
+    type?: ChatType;
   }): Promise<Chat> {
     return prisma.chat.create({
       data: {
-        userId: data.userId,
-        sessionId: data.sessionId,
-        sender: data.sender,
-        message: data.message,
+        userId,
+        sessionId,
+        sender,
+        message,
+        type,
       },
     });
   },
@@ -25,7 +33,7 @@ export const chatService = {
   ): Promise<{ chats: Chat[]; nextCursor: string | null }> {
     const chats = await prisma.chat.findMany({
       where: { sessionId },
-      orderBy: { sentAt: "desc" },
+      orderBy: { sentAt: "asc" },
 
       cursor: cursor ? { id: cursor } : undefined,
       skip: cursor ? 1 : 0,
