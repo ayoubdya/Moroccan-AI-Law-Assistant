@@ -27,8 +27,8 @@ export default function ChatInput({ onSendMessage, disabled = false }: ChatInput
 
   return (
     <form onSubmit={handleSubmit} className="border-t border-amber-200 p-4 bg-white shadow-sm">
-      <div className="flex items-end space-x-3">
-        <div className="flex-grow">
+      <div className="flex flex-col space-x-3">
+        <div className="w-full">
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -38,19 +38,22 @@ export default function ChatInput({ onSendMessage, disabled = false }: ChatInput
             rows={3}
             disabled={disabled}
           />
+          
+        </div>
+        <div className='flex justify-between items-center'>
           <p className="text-xs text-amber-700 mt-1">
             Press Enter to send, Shift+Enter for a new line
           </p>
+          <button
+            type="submit"
+            disabled={!message.trim() || disabled}
+            className={`px-6 py-3 rounded-md transition-colors ${!message.trim() || disabled 
+              ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
+              : 'bg-slate-700 text-white hover:bg-slate-600'}`}
+          >
+            Send
+          </button>
         </div>
-        <button
-          type="submit"
-          disabled={!message.trim() || disabled}
-          className={`px-6 py-3 rounded-md transition-colors ${!message.trim() || disabled 
-            ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
-            : 'bg-slate-700 text-white hover:bg-slate-600'}`}
-        >
-          Send
-        </button>
       </div>
     </form>
   );
