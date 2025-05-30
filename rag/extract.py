@@ -8,16 +8,17 @@ CHUNK_OVERLAP = 100
 
 
 def clean_text(text: str) -> str:
-  cleaned_text = re.sub(r"[^\w\u0600-\u06FF\s]+", "", text)
+  cleaned_text = re.sub(r"[^\w\u0600-\u06FF\s\.\,\!\?\:\;\'\"\(\)\[\]\-]+", "", text)
   # cleaned_text = re.sub(r"\s+", " ", cleaned_text)
   return cleaned_text
 
 
 def split_articles(text: str) -> List[str]:
   captures = re.split(r"(?:المادة (\d+|األولى))\n", text)[1:]
-  article_idx = 1
   articles: list[str] = []
   buffer: str = ""
+  article_idx = 1 if captures[0].strip() == "األولى" else int(captures[0].strip())
+
   for i, capture in enumerate(captures):
     if i % 2 == 0:
       if capture.strip() == "األولى" or int(capture) == article_idx:
