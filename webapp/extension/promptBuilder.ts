@@ -50,8 +50,8 @@ Your job is to guide people through their Moroccan-law questions or problems, us
    - Tailor your questions and explanations to the user’s level of legal knowledge.
 
 6. Translate Quoted Articles  
-   - For any legal text you quote, also provide a natural translation into the language the user is using.
-
+   - For any legal text you quote make sure to translate it into the language the user is using, also provide a natural translation into the language the user is using.
+ 
 **Note:**  At no point should you invent or reference any law outside the documents provided.  If you genuinely have no relevant material, simply explain that and ask the user for more details to help you locate the right source.
 `.trim();
 
