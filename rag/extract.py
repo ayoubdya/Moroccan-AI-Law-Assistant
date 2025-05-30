@@ -5,6 +5,8 @@ import subprocess
 
 CHUCK_SIZE = 3000
 CHUNK_OVERLAP = 100
+FOLDER_PATH = "PDFs"
+OUTPUT_FOLDER = "PDF_text"
 
 
 def clean_text(text: str) -> str:
@@ -14,7 +16,9 @@ def clean_text(text: str) -> str:
 
 
 def split_articles(text: str) -> List[str]:
-  captures = re.split(r"(?:المادة (\d+|األولى))\n", text)[1:]
+  captures = re.split(r"(?:(?:المادة|الفصل) (\d+|األولى))\n", text)[1:]
+  if not captures or len(captures) < 2:
+    return []
   articles: list[str] = []
   buffer: str = ""
   article_idx = 1 if captures[0].strip() == "األولى" else int(captures[0].strip())
@@ -56,8 +60,6 @@ def chunk_text(text: str, chunk_size: int, overlap: int) -> List[str]:
 
 
 if __name__ == "__main__":
-  FOLDER_PATH = "PDFs"
-  OUTPUT_FOLDER = "PDF_text"
   if not os.path.exists(OUTPUT_FOLDER):
     os.makedirs(OUTPUT_FOLDER)
   for filename in os.listdir(FOLDER_PATH):
@@ -76,10 +78,10 @@ if __name__ == "__main__":
     if not filename.endswith(".txt"):
       continue
     file_path = os.path.join(OUTPUT_FOLDER, filename)
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, "r+", encoding="utf-8") as f:
       text = f.read()
       cleaned_text = clean_text(text)
-
-    with open(file_path, "w", encoding="utf-8") as f:
+      f.seek(0)
       f.write(cleaned_text)
-      print(f"Cleaned text saved to {file_path}")
+      f.truncate()
+    print(f"Cleaned text saved to {file_path}")
