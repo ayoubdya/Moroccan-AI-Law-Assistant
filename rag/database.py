@@ -1,7 +1,8 @@
 import os
 import sys
 from pinecone import Pinecone, ServerlessSpec, Vector
-from pinecone.data.types import SearchQueryTypedDict
+
+# from pinecone.data.types import SearchQueryTypedDict
 from typing import List
 
 from types_def import Database, QueryResult, SchemaWithCategory, SchemaWithFilename
@@ -16,7 +17,7 @@ class PineconeDatabase(Database):
     self.pc = Pinecone(api_key=PINECONE_API_KEY)
     self.index = self.pc.Index(index_name)
 
-  def upsert(self, data: List[SchemaWithFilename]) -> None:
+  def upsert(self, data: List[SchemaWithCategory]) -> None:
     vectors = [
       Vector(
         id=item["id"],
@@ -24,7 +25,8 @@ class PineconeDatabase(Database):
         if isinstance(item["vector"], list)
         else item["vector"].tolist(),
         metadata={
-          "filename": item["metadata"]["filename"],
+          "chunk_text": item["metadata"]["chunk_text"],
+          "category": item["metadata"]["category"],
         },
       )
       for item in data
@@ -33,7 +35,7 @@ class PineconeDatabase(Database):
     self.index.upsert(vectors=vectors)
 
   def query(self, query_vector: List[float], top_k: int = 10) -> List[QueryResult]:
-    query: SearchQueryTypedDict = {
+    query = {
       "top_k": top_k,
       "vector": {
         "values": query_vector,
@@ -42,8 +44,8 @@ class PineconeDatabase(Database):
 
     results = self.index.search(
       namespace="",
-      query=query,
-      fields=["filename"],
+      query=query,  # type: ignore
+      fields=["chunk_text", "category"],
     )
 
     return [
@@ -51,7 +53,8 @@ class PineconeDatabase(Database):
         "id": hit["_id"],
         "score": round(hit["_score"], 4),
         "metadata": {
-          "filename": hit["fields"]["filename"],
+          "chunk_text": hit["fields"]["chunk_text"],
+          "category": hit["fields"]["category"],
         },
       }
       for hit in results["result"]["hits"]

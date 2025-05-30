@@ -7,6 +7,8 @@ from google import genai
 
 
 class Gemini:
+  EMBEDDING_DIMENSION = 768
+
   def __init__(self):
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
     if not GEMINI_API_KEY:

@@ -16,8 +16,8 @@ def clean_text(text: str) -> str:
 def split_articles(text: str) -> List[str]:
   captures = re.split(r"(?:المادة (\d+|األولى))\n", text)[1:]
   article_idx = 1
-  articles = []
-  buffer = ""
+  articles: list[str] = []
+  buffer: str = ""
   for i, capture in enumerate(captures):
     if i % 2 == 0:
       if capture.strip() == "األولى" or int(capture) == article_idx:
@@ -56,7 +56,7 @@ def chunk_text(text: str, chunk_size: int, overlap: int) -> List[str]:
 
 if __name__ == "__main__":
   FOLDER_PATH = "PDFs"
-  OUTPUT_FOLDER = "PDF_texts"
+  OUTPUT_FOLDER = "PDF_text"
   if not os.path.exists(OUTPUT_FOLDER):
     os.makedirs(OUTPUT_FOLDER)
   for filename in os.listdir(FOLDER_PATH):
