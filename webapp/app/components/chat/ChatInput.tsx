@@ -1,6 +1,15 @@
 "use client";
 
-import React, { useState, KeyboardEvent } from 'react';
+import React, { useState, KeyboardEvent, useEffect } from 'react';
+
+// Helper function to detect RTL text (Arabic, Hebrew, etc.)
+function isRTL(text: string): boolean {
+  // RTL Unicode ranges - specifically targeting Arabic characters
+  const arabicChars = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+  
+  // Check if any Arabic character is present
+  return arabicChars.test(text);
+}
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -9,6 +18,26 @@ interface ChatInputProps {
 
 export default function ChatInput({ onSendMessage, disabled = false }: ChatInputProps) {
   const [message, setMessage] = useState('');
+  const [isRtlInput, setIsRtlInput] = useState(false);
+  
+  // Detect text direction when message changes
+  useEffect(() => {
+    // Even if empty, we want to reset to LTR
+    setIsRtlInput(message.trim() ? isRTL(message) : false);
+  }, [message]);
+  
+  // Handle input changes with immediate RTL detection
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setMessage(newValue);
+    
+    // Immediately detect if Arabic is being typed
+    if (newValue.trim()) {
+      setIsRtlInput(isRTL(newValue));
+    } else {
+      setIsRtlInput(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +60,11 @@ export default function ChatInput({ onSendMessage, disabled = false }: ChatInput
         <div className="w-full">
           <textarea
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Type your legal question here..."
-            className="w-full border border-amber-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-slate-600 resize-none placeholder-amber-400 text-amber-900"
+            className={`w-full border border-amber-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:border-slate-600 resize-none placeholder-amber-400 text-amber-900 ${isRtlInput ? 'rtl-input' : 'ltr-input'}`}
+            dir={isRtlInput ? 'rtl' : 'ltr'}
             rows={3}
             disabled={disabled}
           />

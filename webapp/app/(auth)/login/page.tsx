@@ -24,7 +24,16 @@ export default function LoginPage() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // Check for registration success message in URL
+  React.useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('registered') === 'true') {
+      setSuccess('Account created successfully! Please sign in with your credentials.');
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -109,6 +118,11 @@ export default function LoginPage() {
           {error && (
             <div className="bg-amber-50 border-l-4 border-amber-600 text-amber-800 px-4 py-3 rounded-r-md">
               {error}
+            </div>
+          )}
+          {success && (
+            <div className="bg-green-50 border-l-4 border-green-600 text-green-800 px-4 py-3 rounded-r-md">
+              {success}
             </div>
           )}
           <div className="space-y-4">
