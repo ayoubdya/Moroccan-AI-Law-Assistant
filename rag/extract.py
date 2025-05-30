@@ -8,10 +8,31 @@ CHUNK_OVERLAP = 100
 
 
 def clean_text(text: str) -> str:
-  # Replace non-alphanumeric, non-Arabic characters, and multiple whitespaces
   cleaned_text = re.sub(r"[^\w\u0600-\u06FF\s]+", "", text)
-  cleaned_text = re.sub(r"\s+", " ", cleaned_text)
+  # cleaned_text = re.sub(r"\s+", " ", cleaned_text)
   return cleaned_text
+
+
+def split_articles(text: str) -> List[str]:
+  captures = re.split(r"(?:المادة (\d+|األولى))\n", text)[1:]
+  article_idx = 1
+  articles = []
+  buffer = ""
+  for i, capture in enumerate(captures):
+    if i % 2 == 0:
+      if capture.strip() == "األولى" or int(capture) == article_idx:
+        if buffer:
+          articles.append(buffer.strip())
+          buffer = ""
+        article_idx += 1
+
+      buffer += f"المادة {capture} "
+    else:
+      buffer += capture
+
+  if buffer:
+    articles.append(buffer)
+  return articles
 
 
 def chunk_text(text: str, chunk_size: int, overlap: int) -> List[str]:
@@ -33,7 +54,6 @@ def chunk_text(text: str, chunk_size: int, overlap: int) -> List[str]:
   return chunks
 
 
-# Example of file processing - similar to the commented code in the original TypeScript
 if __name__ == "__main__":
   FOLDER_PATH = "PDFs"
   OUTPUT_FOLDER = "PDF_texts"
