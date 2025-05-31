@@ -16,7 +16,7 @@ def clean_text(text: str) -> str:
 
 
 def split_articles(text: str) -> List[str]:
-  captures = re.split(r"(?:(?:المادة|الفصل) (\d+|األولى))\n", text)[1:]
+  captures = re.split(r"(?:(?:المادة|الفصل|املادة)\s?(\d+|األولى))\n", text)[1:]
   if not captures or len(captures) < 2:
     return []
   articles: list[str] = []
@@ -40,9 +40,11 @@ def split_articles(text: str) -> List[str]:
   return articles
 
 
-def chunk_text(text: str, chunk_size: int, overlap: int) -> List[str]:
+def chunk_text(
+  text: str, chunk_size: int, overlap: int, split_by: str = "\n\n"
+) -> List[str]:
   chunks = []
-  paragraphs = text.split("\n\n")
+  paragraphs = text.split(split_by)
 
   current_chunk = ""
   for paragraph in paragraphs:
