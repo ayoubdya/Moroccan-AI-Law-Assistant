@@ -5,6 +5,8 @@ dist/
 .env
 .DS_Store
 
+rag_old/
+
 # Logs
 *.log
 npm-debug.log*
