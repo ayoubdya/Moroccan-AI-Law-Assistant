@@ -21,37 +21,60 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // get sessionId from url
+  // get sessionId from url and load session data
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sid = urlParams.get("session");
-    if (sid) {
-      setSessionId(sid);
-      sessionsApi.getSessionById(sid).then((session: Prisma.SessionGetPayload<{
-        include: { Chat: true }
-      }>) => {
-        setLoading(true);
-        const formattedMessages = session.Chat.filter((chat) => chat.type === "chat").map((msg) => ({
-          id: msg.id,
-          content: msg.message,
-          sender: msg.sender,
-          timestamp: new Date(msg.sentAt),
-        }));
-        setMessages(formattedMessages);
-      }).catch((err) => {
+    const loadSessionData = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sid = urlParams.get("session");
+        
+        if (sid) {
+          setLoading(true);
+          setSessionId(sid);
+          
+          // Get session data with chat history
+          const session = await sessionsApi.getSessionById(sid);
+          
+          if (session && session.Chat && Array.isArray(session.Chat)) {
+            // Filter chat messages and format them
+            const formattedMessages = session.Chat
+              .filter((chat: any) => chat.type === "chat")
+              .map((msg: any) => ({
+                id: msg.id,
+                content: msg.message,
+                sender: msg.sender,
+                timestamp: new Date(msg.sentAt),
+              }));
+            
+            setMessages(formattedMessages);
+          } else {
+            console.error("Invalid session data structure:", session);
+            setMessages([
+              {
+                id: "err-structure",
+                content: "Error loading chat history: Invalid data structure.",
+                sender: "model",
+                timestamp: new Date(),
+              },
+            ]);
+          }
+        }
+      } catch (err) {
         console.error("Failed to fetch session messages:", err);
         setMessages([
           {
             id: "err",
-            content: "Could not load chat history.",
+            content: "Could not load chat history. Please try again later.",
             sender: "model",
             timestamp: new Date(),
           },
         ]);
-      }).finally(() => {
+      } finally {
         setLoading(false);
-      });
-    }
+      }
+    };
+    
+    loadSessionData();
   }, []);
 
   // auto-scroll

@@ -50,16 +50,24 @@ export const authApi = {
 
 // API functions for chat sessions
 export const sessionsApi = {
-  getAllSessions: async () => {
+  getAllSessions: async (userId?: string) => {
     try {
       const token = getToken();
-      const response = await axios.get(`${API_URL}/sessions`, {
+      // Build URL with query parameters
+      let url = `${API_URL}/sessions`;
+      if (userId) {
+        url += `?userId=${userId}`;
+      }
+      
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      return response.data;
+      
+      // Return the sessions array from the response
+      return response.data.sessions || [];
     } catch (error) {
       console.error('Get sessions error:', error);
       throw error;

@@ -6,7 +6,6 @@ import Link from 'next/link';
 import axios from 'axios';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import { setToken } from '../../utils/auth';
 import { LoginResponse } from '../../types';
 
 export default function RegisterPage() {
@@ -56,8 +55,8 @@ export default function RegisterPage() {
         }
       });
       
-      setToken(response.data.token);
-      router.push('/dashboard');
+      // Registration successful - redirect to login page with success message
+      router.push('/login?registered=true');
     } catch (err: any) {
       console.error('Registration error:', err);
       setError(err.response?.data?.error || err.message || 'Registration failed. Please try again.');
