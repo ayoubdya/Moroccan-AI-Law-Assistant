@@ -1,7 +1,7 @@
 "use client";
 
-import React, { ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { ReactNode, useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 interface AuthLayoutProps {
@@ -10,6 +10,33 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Close sidebar when changing routes on mobile
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const sidebar = document.getElementById('sidebar');
+      const toggleButton = document.getElementById('sidebar-toggle');
+      
+      if (sidebar && toggleButton && 
+          !sidebar.contains(event.target as Node) && 
+          !toggleButton.contains(event.target as Node) &&
+          sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [sidebarOpen]);
 
   const handleLogout = () => {
     // Clear session storage
@@ -21,9 +48,20 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-amber-50 relative">
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/30 z-10 md:hidden" 
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
       {/* Sidebar */}
-      <div className="w-64 bg-gradient-to-b from-amber-700 to-amber-800 text-white shadow-lg">
+      <div 
+        id="sidebar"
+        className={`fixed left-0 top-0 w-64 bg-amber-700 text-white shadow-lg z-20 h-screen overflow-y-auto transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+      >
         <div className="p-6 flex items-center justify-center border-b border-amber-600">
           <h1 className="text-xl font-bold">Morocco Legal Assistant</h1>
         </div>
@@ -78,8 +116,24 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
       
       {/* Main content */}
-      <div className="flex-1 bg-amber-50">
-        <div className="p-6">
+      <div className="flex-1 w-full overflow-x-hidden md:ml-64">
+        {/* Mobile header with menu button */}
+        <div className="md:hidden flex items-center p-4 bg-white border-b border-gray-200 shadow-sm">
+          <button 
+            id="sidebar-toggle"
+            className="p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Toggle navigation menu"
+            title="Toggle navigation menu"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <div className="ml-4 font-semibold text-lg text-amber-800">Morocco Legal Assistant</div>
+        </div>
+        
+        <div className="p-4 md:p-6">
           {children}
         </div>
       </div>
