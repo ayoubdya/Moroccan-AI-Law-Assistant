@@ -34,6 +34,12 @@ class PineconeDatabase(Database):
 
     self.index.upsert(vectors=vectors)
 
+  def delete(self, ids: List[str]) -> None:
+    self.index.delete(ids=ids)
+
+  def delete_by_filter(self, filter_dict: dict) -> None:
+    self.index.delete(filter=filter_dict)
+
   def query(self, query_vector: List[float], top_k: int = 10) -> List[QueryResult]:
     query = {
       "top_k": top_k,

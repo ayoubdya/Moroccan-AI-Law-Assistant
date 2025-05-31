@@ -52,7 +52,7 @@ def chunk_text(
       chunks.append(current_chunk.strip())
       current_chunk = current_chunk[-overlap:]
 
-    current_chunk += paragraph
+    current_chunk += paragraph + split_by
 
   if len(current_chunk) > 0:
     print(f"Current chunk length: {len(current_chunk)}")
