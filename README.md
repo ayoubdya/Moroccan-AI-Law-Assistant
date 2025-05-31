@@ -130,3 +130,4 @@ This project is licensed under the MIT License.
 For questions or collaboration opportunities:
 - GitHub: [@ayoubdya](https://github.com/ayoubdya)
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ayoubdya/Moroccan-AI-Law-Assistant)
