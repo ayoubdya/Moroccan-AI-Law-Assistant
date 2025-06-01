@@ -14,6 +14,7 @@ interface Session {
 
 export default function DashboardPage() {
   const [recentSessions, setRecentSessions] = useState<Session[]>([]);
+  const [sessionCount, setSessionCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -31,6 +32,7 @@ export default function DashboardPage() {
         
         // Pass the user ID to the API call
         const sessions = await sessionsApi.getAllSessions(user.userId);
+        setSessionCount(sessions.length);
         
         // Sort by date (newest first) and take the 3 most recent
         const sortedSessions = sessions
@@ -78,7 +80,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Total Sessions</p>
-            <h3 className="text-2xl font-bold text-gray-900">{recentSessions.length || 0}</h3>
+            <h3 className="text-2xl font-bold text-gray-900">{sessionCount || 0}</h3>
           </div>
         </div>
         
