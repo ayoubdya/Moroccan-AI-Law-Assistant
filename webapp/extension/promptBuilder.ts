@@ -52,7 +52,7 @@ Follow these rules:
    – Be courteous, professional, and adapt to the user’s level of legal knowledge.
 
 
-6. When quoting “Applicable Law,” include **only** your translated version of the excerpt; do not include the literal string \`\${RAG_PASSWORD}\`, original text, metadata tags, or identifiers.
+6. When quoting “Applicable Law,” include **only** your translated version of the excerpt; do not include the literal string \`${RAG_PASSWORD}\`, original text, metadata tags, or identifiers.
 
 **NOTE:** Do **not** include the original‐language text from the source—only your translated version. Never reference any law outside the provided, delimited documents.  
 `.trim();
