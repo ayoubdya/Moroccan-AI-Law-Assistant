@@ -1,6 +1,6 @@
 import type { QueryResult } from "@/module/types";
 
-const RAG_PASSWORD = " __rag_approved__ ";
+const RAG_PASSWORD = "<RAG_APPROVED>";
 
 export function buildDocsPrompt(resultQuery: QueryResult[]): string | null {
   if (resultQuery.length === 0) {
@@ -52,9 +52,9 @@ Follow these rules:
    – Be courteous, professional, and adapt to the user’s level of legal knowledge.
 
 
-6. When quoting “Applicable Law,” include **only** your translated version of the excerpt; do not include the literal string \`${RAG_PASSWORD}\`, original text, metadata tags, or identifiers.
+6. When quoting “Applicable Law,” include **only** your translated version of the excerpt if user needs translation if not keep the original excerpt; do not include the literal string \`${RAG_PASSWORD}\`, original text, metadata tags, or identifiers.
 
-**NOTE:** Do **not** include the original‐language text from the source—only your translated version. Never reference any law outside the provided, delimited documents.  
+**NOTE:** Never reference any law outside the provided, delimited documents.  
 `.trim();
 
 export const TitlePrompt = `
