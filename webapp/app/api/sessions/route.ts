@@ -7,7 +7,7 @@ import { Gemini } from "@/module/model";
 
 const gemini = new Gemini();
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 50;
 
 const getSessionsQuerySchema = z.object({
   userId: z.string().uuid(),
