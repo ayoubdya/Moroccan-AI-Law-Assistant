@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
       filename_en = translate(filename[:-4])
       filename_en = sanitize(filename_en)
-      l: list[SchemaWithCategory] = []
+      data: list[SchemaWithCategory] = []
       for idx, (article, embedding) in enumerate(
         zip(translated_articles, embedded_articles), start=1
       ):
@@ -75,12 +75,12 @@ if __name__ == "__main__":
             "category": filename_en,
           },
         )
-        l.append(ret)
+        data.append(ret)
 
-      store[filename] = l
-      print(f"Upserting {len(l)} articles to the database...")
-      db.upsert(l)
-      print(f"Processed {filename} with {len(l)} articles.")
+      store[filename] = data
+      print(f"Upserting {len(data)} articles to the database...")
+      db.upsert(data)
+      print(f"Processed {filename} with {len(data)} articles.")
   except Exception as e:
     print(f"An error occurred: {e}")
   finally:

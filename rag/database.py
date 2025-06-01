@@ -5,7 +5,7 @@ from pinecone import Pinecone, ServerlessSpec, Vector
 # from pinecone.data.types import SearchQueryTypedDict
 from typing import List
 
-from types_def import Database, QueryResult, SchemaWithCategory, SchemaWithFilename
+from types_def import Database, QueryResult, SchemaWithCategory
 
 
 class PineconeDatabase(Database):
