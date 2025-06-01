@@ -6,7 +6,7 @@ export function buildDocsPrompt(resultQuery: QueryResult[]): string | null {
   }
 
   const ragTexts = resultQuery.map((res) => {
-    const metaStr = `${res.id} : ${res.metadata.chunk_text} , Category : ${res.metadata.category}`;
+    const metaStr = `${res.id} : ${res.metadata.chunk_text} , Category : ${res.metadata.category.replace(/_+/g, " ")}`;
 
     return metaStr;
   });
