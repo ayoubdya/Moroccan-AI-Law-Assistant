@@ -9,7 +9,7 @@ export function buildDocsPrompt(resultQuery: QueryResult[]): string | null {
 
   const docs = resultQuery
     .map((res) => {
-      const meta = `${res.id}: ${res.metadata.chunk_text} (Category: ${res.metadata.category})`;
+      const meta = `${res.id}: ${res.metadata.chunk_text} (Category: ${res.metadata.category.replace(/_+/g, " ")})`;
       return `${RAG_PASSWORD}\n${meta}\n${RAG_PASSWORD}`;
     })
     .join("\n");
