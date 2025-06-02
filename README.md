@@ -124,10 +124,3 @@ The application currently has:
 ## License
 
 This project is licensed under the MIT License.
-
-## Contact
-
-For questions or collaboration opportunities:
-- GitHub: [@ayoubdya](https://github.com/ayoubdya)
-
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ayoubdya/Moroccan-AI-Law-Assistant)
