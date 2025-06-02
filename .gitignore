@@ -42,3 +42,4 @@ coverage/
 .idea/
 /webapp/.next
 /webapp/app/generated
+webapp/prisma/schema.prisma

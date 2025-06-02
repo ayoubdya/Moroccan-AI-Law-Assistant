@@ -9,12 +9,12 @@ import { buildDocsPrompt, SystemPrompt } from "@/extension/promptBuilder";
 import { chatService } from "@/app/services/chatService";
 import { Sender } from "@/app/generated/prisma";
 
-import { TranslateText } from "@/extension/translationManager";
+import { GetFullInfoLang, TranslateText } from "@/extension/translationManager";
 
 const gemini = new Gemini();
 const database = new PineconeDatabase("moroccan-law-db");
 
-const DOC_COUNT = 3;
+const DOC_COUNT = 10;
 
 const PAGE_SIZE = 20;
 
@@ -83,14 +83,24 @@ export async function POST(req: NextRequest) {
   });
 
   let promptEng: string;
+  let lang: string;
   try {
-    const { translatedText } = await TranslateText(prompt);
+    const {
+      translatedText,
+      detectedLanguage: { language },
+    } = await TranslateText(prompt);
     promptEng = translatedText;
+
+    const { name } = await GetFullInfoLang(language);
+
+    lang = name;
   } catch (error) {
     console.error("Translation failed, using original prompt:", error);
     promptEng = prompt;
+    lang =
+      "use user latest message language and tell him there was a problem with detecting your language use another language ";
   }
-
+  console.log(lang);
   const emb = await gemini.embedContent([promptEng]);
 
   const top = await database.query(emb[0]!, DOC_COUNT);
@@ -117,7 +127,7 @@ export async function POST(req: NextRequest) {
         10
       );
 
-      const sysPrompt = gemini.messagesToContentsUser([SystemPrompt]);
+      const sysPrompt = gemini.messagesToContentsUser([SystemPrompt(lang)]);
 
       const history = gemini.chatsToContents(recentChats);
 

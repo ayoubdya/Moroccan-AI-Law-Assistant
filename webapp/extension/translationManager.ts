@@ -17,3 +17,16 @@ export async function TranslateText(text: string) {
     .then((res) => res.data)
     .catch((e) => console.log(e));
 }
+
+export async function GetFullInfoLang(idLang: string) {
+  return axios
+    .get(
+      urls.url_lang,
+
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    )
+    .then((res) => res.data.find((lang: any) => lang.code === idLang))
+    .catch((e) => console.log(e));
+}
